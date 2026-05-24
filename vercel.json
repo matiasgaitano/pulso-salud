@@ -1,0 +1,15 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "regions": ["gru1"],
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic-api-key",
+    "DAILY_API_KEY": "@daily-api-key",
+    "DAILY_API_URL": "https://api.daily.co/v1",
+    "MERCADOPAGO_ACCESS_TOKEN": "@mercadopago-access-token",
+    "MERCADOPAGO_PUBLIC_KEY": "@mercadopago-public-key",
+    "MERCADOPAGO_WEBHOOK_SECRET": "@mercadopago-webhook-secret"
+  }
+}
