@@ -6,6 +6,7 @@ import type { Consultation, Specialist } from "@/types";
 import { SpecialistCard } from "@/components/consultation/SpecialistCard";
 import { ClinicalRecordView } from "@/components/consultation/ClinicalRecord";
 import { Spinner } from "@/components/ui/Spinner";
+import type { ClinicalRecord } from "@/types";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -18,6 +19,11 @@ export default function SpecialistPage({ params }: Props) {
   const [specialists, setSpecialists] = useState<Specialist[]>([]);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const buildMatchReason = (record: ClinicalRecord): string => {
+    const symptoms = record.symptoms.slice(0, 3).join(", ");
+    return `Tu consulta por "${record.chiefComplaint}"${symptoms ? ` con síntomas de ${symptoms}` : ""} indica que este especialista es el más adecuado para tu caso. ${record.triageSummary}`;
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -83,7 +89,7 @@ export default function SpecialistPage({ params }: Props) {
       <h1 className="text-2xl font-bold text-slate-900 mb-1">
         Especialistas recomendados
       </h1>
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center gap-2 mb-4">
         <p className="text-slate-500 text-sm">
           Basado en tu triage, el sistema recomendó:
         </p>
@@ -94,6 +100,17 @@ export default function SpecialistPage({ params }: Props) {
         )}
       </div>
 
+      {consultation?.clinicalRecord?.triageSummary && (
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-8">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">
+            Resumen de tu caso
+          </p>
+          <p className="text-sm text-slate-700 leading-relaxed">
+            {consultation.clinicalRecord.triageSummary}
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Specialist list */}
         <div className="lg:col-span-2 space-y-4">
@@ -102,6 +119,7 @@ export default function SpecialistPage({ params }: Props) {
               key={sp.id}
               specialist={sp}
               consultationId={id}
+              matchReason={consultation?.clinicalRecord ? buildMatchReason(consultation.clinicalRecord) : undefined}
               onSelect={handleSelect}
               isLoading={loadingId === sp.id}
             />

@@ -19,12 +19,14 @@ const SPECIALTY_LABELS: Record<string, string> = {
 interface Props {
   specialist: Specialist;
   consultationId: string;
+  matchReason?: string;
   onSelect: (specialist: Specialist) => void;
   isLoading?: boolean;
 }
 
 export function SpecialistCard({
   specialist,
+  matchReason,
   onSelect,
   isLoading = false,
 }: Props) {
@@ -70,8 +72,21 @@ export function SpecialistCard({
         </div>
       </div>
 
+      {/* Why recommended */}
+      {matchReason && (
+        <div className="bg-pulso-50 rounded-xl px-3 py-2.5">
+          <p className="text-xs font-semibold text-pulso-700 mb-1">
+            ¿Por qué lo recomendamos?
+          </p>
+          <p className="text-xs text-pulso-800 leading-relaxed">{matchReason}</p>
+        </div>
+      )}
+
       {/* Bio */}
-      <p className="text-xs text-slate-600 leading-relaxed">{specialist.bio}</p>
+      <div>
+        <p className="text-xs font-semibold text-slate-500 mb-1">Sobre el especialista</p>
+        <p className="text-xs text-slate-600 leading-relaxed">{specialist.bio}</p>
+      </div>
 
       {/* Slots */}
       {specialist.availableSlots.length > 0 && (
