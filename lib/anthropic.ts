@@ -21,17 +21,63 @@ REGLAS DE CONVERSACIÓN:
 - Si hay síntomas de EMERGENCIA (dolor de pecho irradiado al brazo, dificultad respiratoria severa, pérdida de conciencia, signos de ACV), indicá INMEDIATAMENTE que llame al 911
 - No hacés diagnósticos. Solo orientás y derivás al especialista correcto
 
-CRITERIOS PARA ELEGIR ESPECIALIDAD:
-- cardiologia: dolor de pecho, palpitaciones, presión alta, arritmias, insuficiencia cardíaca, colesterol
-- neurologia: dolores de cabeza frecuentes/intensos, mareos, convulsiones, hormigueos, pérdida de fuerza, problemas de memoria, temblores
-- dermatologia: manchas, lunares, erupciones, picazón, caída de cabello, acné severo, psoriasis, hongos
-- traumatologia: dolores articulares, musculares, fracturas, tendinitis, lesiones deportivas, columna, rodilla, hombro
-- ginecologia: problemas menstruales, dolor pélvico, embarazo, menopausia, flujo vaginal, salud reproductiva
-- pediatria: síntomas en menores de 18 años, fiebre en niños, desarrollo infantil, vacunas
-- gastroenterologia: dolor abdominal, diarrea crónica, constipación, reflujo, náuseas, sangrado digestivo, colon irritable
-- endocrinologia: diabetes, problemas de tiroides, obesidad, problemas hormonales, cansancio crónico inexplicable
-- psiquiatria: ansiedad, depresión, insomnio crónico, ataques de pánico, trastornos del estado de ánimo, adicciones
-- medicina_general: síntomas inespecíficos, chequeos generales, fiebre, resfríos, cuando no encaja en otra categoría
+CRITERIOS ESTRICTOS PARA ELEGIR ESPECIALIDAD:
+
+traumatologia → TODO lo relacionado con huesos, articulaciones, músculos, tendones o ligamentos:
+  rodilla, cadera, hombro, codo, muñeca, tobillo, columna, espalda baja, cuello, costillas
+  menisco, ligamento, cartílago, fractura, esguince, luxación, tendinitis, bursitis
+  hernia de disco, escoliosis, artrosis, artritis, osteoporosis, osteoartritis
+  lesión deportiva, golpe, caída, contractura, tortícolis, dolor lumbar, ciática
+  "me van a operar la rodilla/cadera/columna/hombro/tobillo" → siempre traumatologia
+  rehabilitación post-quirúrgica por huesos o articulaciones → traumatologia
+
+cardiologia → corazón y circulación:
+  dolor de pecho, palpitaciones, presión alta, presión baja, arritmia, taquicardia
+  insuficiencia cardíaca, soplo cardíaco, colesterol alto, triglicéridos, angina
+  NO usar para dolores musculares ni articulares aunque sean en el pecho
+
+neurologia → sistema nervioso:
+  dolor de cabeza frecuente o muy intenso, migraña, jaqueca, cefalea
+  mareos, vértigo, desmayos, convulsiones, epilepsia
+  hormigueo, entumecimiento, pérdida de fuerza o sensibilidad en brazos o piernas
+  temblores, pérdida de memoria, confusión, dificultad para hablar o tragar
+  esclerosis múltiple, Parkinson, neuropatía
+
+dermatologia → piel, cabello y uñas:
+  manchas, lunares que cambian, erupciones, sarpullido, urticaria
+  picazón generalizada, acné severo, psoriasis, eczema, dermatitis atópica
+  caída de cabello, alopecia, hongos en piel o uñas, verrugas, herpes en la piel
+
+ginecologia → salud reproductiva femenina:
+  menstruación irregular, dolor menstrual fuerte, ausencia de período, flujo anormal
+  dolor pélvico, embarazo, menopausia, síndrome de ovario poliquístico
+  endometriosis, quistes ováricos, miomas, anticonceptivos, PAP, colposcopía
+
+pediatria → pacientes menores de 18 años:
+  cualquier síntoma en bebés, niños o adolescentes
+  fiebre en menores, desarrollo infantil, vacunas, control de niño sano
+
+gastroenterologia → sistema digestivo:
+  dolor de estómago, dolor abdominal, diarrea crónica, constipación, estreñimiento
+  reflujo, acidez, gastritis, úlceras, náuseas o vómitos frecuentes
+  sangre en heces, colon irritable, enfermedad celíaca, Crohn, colitis
+  problemas de hígado, vesícula, páncreas, hinchazón o distensión abdominal
+
+endocrinologia → hormonas y metabolismo:
+  diabetes, glucosa alta, insulina, tiroides (hipotiroidismo, hipertiroidismo, bocio)
+  obesidad, dificultad para bajar de peso a pesar de dieta, síndrome metabólico
+  cansancio crónico sin causa aparente, sofocos, sudoración nocturna, cambios de peso inexplicables
+
+psiquiatria → salud mental:
+  ansiedad, ataques de pánico, depresión, tristeza persistente, falta de motivación
+  insomnio crónico (más de 1 mes), fobias, trastornos obsesivos, adicciones
+  cambios de humor extremos, pensamientos intrusivos, angustia, autolesiones
+
+medicina_general → SOLO cuando no encaja claramente en ninguna de las anteriores:
+  fiebre sin foco claro, resfríos, gripe, chequeo preventivo general
+  síntomas muy inespecíficos sin pista del sistema afectado
+
+REGLA CRÍTICA: Nunca uses medicina_general si el problema es claramente musculoesquelético, cardíaco, neurológico, dermatológico, ginecológico, digestivo, endocrinológico o de salud mental. Siempre preferí la especialidad específica.
 
 ESPECIALIDADES DISPONIBLES (escribilas EXACTAMENTE así, sin tildes):
 cardiologia | neurologia | dermatologia | traumatologia | ginecologia | pediatria | gastroenterologia | endocrinologia | psiquiatria | medicina_general
@@ -89,83 +135,103 @@ const SPECIALTY_KEYWORDS: { specialty: Specialty; keywords: string[] }[] = [
   {
     specialty: "traumatologia",
     keywords: [
-      "rodilla", "menisco", "ligamento", "columna", "lumbar", "cervical",
-      "fractura", "esguince", "tendinitis", "articulación", "cadera",
-      "tobillo", "hombro", "codo", "muñeca", "operacion hueso", "cirugía ortopédica",
-      "dolor muscular", "lesión deportiva", "hernia de disco", "escoliosis",
+      // joints & bones
+      "rodilla", "menisco", "ligamento", "ligamento cruzado", "cartílago",
+      "columna", "lumbar", "cervical", "hernia de disco", "escoliosis",
+      "fractura", "esguince", "luxación", "tendinitis", "bursitis",
+      "articulación", "cadera", "tobillo", "hombro", "codo", "muñeca",
+      "artrosis", "artritis", "osteoporosis", "prótesis de rodilla", "prótesis de cadera",
+      // symptoms
+      "dolor de espalda", "dolor lumbar", "dolor cervical", "ciática",
+      "contractura", "tortícolis", "lesión deportiva", "dolor muscular crónico",
+      // procedures
+      "me van a operar", "cirugía en la rodilla", "cirugía de columna",
+      "artroscopia", "reemplazo de cadera", "rehabilitación traumatológica",
     ],
   },
   {
     specialty: "cardiologia",
     keywords: [
       "dolor de pecho", "presión alta", "hipertensión", "palpitaciones",
-      "arritmia", "infarto", "angina", "colesterol", "insuficiencia cardíaca",
-      "corazón", "taquicardia", "bradicardia",
+      "arritmia", "infarto", "angina de pecho", "colesterol alto",
+      "insuficiencia cardíaca", "taquicardia", "bradicardia",
+      "fibrilación", "soplo cardíaco", "triglicéridos altos",
     ],
   },
   {
     specialty: "neurologia",
     keywords: [
-      "dolor de cabeza", "migraña", "jaqueca", "mareos", "vértigo",
-      "convulsión", "epilepsia", "hormigueo", "entumecimiento", "temblor",
-      "pérdida de memoria", "esclerosis", "parkinson", "neuropatía",
+      "migraña", "jaqueca", "cefalea", "dolor de cabeza fuerte",
+      "mareos frecuentes", "vértigo", "convulsión", "epilepsia",
+      "hormigueo en manos", "hormigueo en pies", "entumecimiento",
+      "pérdida de fuerza", "temblor", "pérdida de memoria",
+      "esclerosis múltiple", "parkinson", "neuropatía",
+      "dificultad para hablar", "dificultad para caminar",
     ],
   },
   {
     specialty: "dermatologia",
     keywords: [
-      "mancha en la piel", "lunar", "erupción", "picazón", "sarpullido",
-      "acné", "psoriasis", "eczema", "dermatitis", "hongo en la piel",
-      "caída de cabello", "alopecia", "urticaria",
+      "mancha en la piel", "lunar que cambia", "erupción cutánea",
+      "sarpullido", "urticaria", "picazón en la piel",
+      "acné severo", "psoriasis", "eczema", "dermatitis",
+      "hongo en la piel", "hongo en las uñas", "caída de cabello",
+      "alopecia", "verrugas", "herpes en la piel",
     ],
   },
   {
     specialty: "gastroenterologia",
     keywords: [
-      "dolor de estómago", "dolor abdominal", "diarrea", "constipación",
-      "estreñimiento", "reflujo", "acidez", "colon", "intestino",
-      "náuseas", "vómitos crónicos", "sangre en heces", "colitis",
-      "celíaca", "crohn", "hígado", "vesícula",
+      "dolor de estómago", "dolor abdominal", "diarrea crónica",
+      "constipación", "estreñimiento crónico", "reflujo gastroesofágico",
+      "acidez estomacal", "gastritis", "úlcera gástrica",
+      "náuseas frecuentes", "vómitos crónicos", "sangre en heces",
+      "colon irritable", "enfermedad celíaca", "crohn", "colitis",
+      "hígado", "vesícula biliar", "cálculos biliares", "páncreas",
+      "hinchazón abdominal", "distensión abdominal",
     ],
   },
   {
     specialty: "ginecologia",
     keywords: [
-      "menstruación", "regla", "período", "embarazo", "menopausia",
-      "ovario", "útero", "vagina", "flujo", "dolor pélvico",
-      "endometriosis", "quiste ovárico", "anticonceptivos",
+      "menstruación irregular", "dolor menstrual", "ausencia de período",
+      "flujo vaginal anormal", "dolor pélvico", "embarazo",
+      "menopausia", "síndrome de ovario poliquístico", "ovario poliquístico",
+      "endometriosis", "quiste ovárico", "mioma uterino",
+      "anticonceptivos", "pap", "colposcopía", "útero", "ovario",
     ],
   },
   {
     specialty: "endocrinologia",
     keywords: [
-      "diabetes", "glucosa", "azúcar en sangre", "tiroides", "hipotiroidismo",
-      "hipertiroidismo", "obesidad", "sobrepeso", "hormona", "insulina",
-      "cansancio crónico", "fatiga crónica", "metabolismo",
+      "diabetes", "glucosa alta", "azúcar en sangre alta", "insulina",
+      "hipotiroidismo", "hipertiroidismo", "tiroides", "bocio",
+      "obesidad mórbida", "no puedo bajar de peso", "síndrome metabólico",
+      "resistencia a la insulina", "cansancio extremo sin causa",
+      "fatiga crónica inexplicable", "sofocos", "sudoración nocturna",
     ],
   },
   {
     specialty: "psiquiatria",
     keywords: [
-      "ansiedad", "depresión", "pánico", "ataque de pánico", "insomnio",
-      "tristeza", "angustia", "fobia", "trastorno", "adicción",
-      "no puedo dormir", "pensamientos negativos", "ganas de llorar",
+      "ansiedad crónica", "ataques de pánico", "depresión", "tristeza persistente",
+      "insomnio crónico", "no puedo dormir hace meses",
+      "fobia", "trastorno obsesivo", "adicción al alcohol", "adicción a drogas",
+      "cambios de humor extremos", "pensamientos de hacerme daño",
+      "angustia constante", "ganas de llorar sin motivo",
     ],
   },
   {
     specialty: "pediatria",
     keywords: [
-      "niño", "niña", "bebé", "hijo", "hija", "menor de edad",
+      "mi hijo", "mi hija", "el nene", "la nena", "bebé", "recién nacido",
       "tiene 1 año", "tiene 2 años", "tiene 3 años", "tiene 4 años",
       "tiene 5 años", "tiene 6 años", "tiene 7 años", "tiene 8 años",
       "tiene 9 años", "tiene 10 años", "tiene 11 años", "tiene 12 años",
       "tiene 13 años", "tiene 14 años", "tiene 15 años", "tiene 16 años",
-      "mi hijo", "mi hija", "el nene", "la nena",
+      "tiene 17 años", "menor de edad", "niño de", "niña de",
+      "fiebre en el bebé", "desarrollo del niño", "vacuna infantil",
     ],
-  },
-  {
-    specialty: "neurologia",
-    keywords: ["dolor de cabeza fuerte", "cefalea"],
   },
 ];
 
