@@ -1,16 +1,45 @@
-import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
+"use client";
+
+import { useEffect, useState, use } from "react";
+import { useRouter } from "next/navigation";
+import type { Consultation } from "@/types";
 import { TriageChat } from "@/components/chat/TriageChat";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default async function ChatPage({ params }: Props) {
-  const { id } = await params;
-  const consultation = db.consultations.findById(id);
+export default function ChatPage({ params }: Props) {
+  const { id } = use(params);
+  const router = useRouter();
+  const [consultation, setConsultation] = useState<Consultation | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!consultation) notFound();
+  useEffect(() => {
+    fetch(`/api/consultations/${id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("not found");
+        return r.json();
+      })
+      .then((data: Consultation) => {
+        setConsultation(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        router.replace("/triage");
+      });
+  }, [id, router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!consultation) return null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
