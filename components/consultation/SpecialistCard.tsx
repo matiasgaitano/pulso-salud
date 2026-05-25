@@ -28,9 +28,11 @@ export function SpecialistCard({
   onSelect,
   isLoading = false,
 }: Props) {
+  // FIX: filter empty segments to avoid undefined on n[0]
   const initials = specialist.name
     .replace(/^Dr[a]?\.\s+/, "")
     .split(" ")
+    .filter((n) => n.length > 0)
     .slice(0, 2)
     .map((n) => n[0])
     .join("");

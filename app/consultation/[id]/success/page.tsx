@@ -15,24 +15,34 @@ function SuccessContent({ id }: { id: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [consultation, setConsultation] = useState<Consultation | null>(null);
-  const [roomReady, setRoomReady] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const paymentId = searchParams.get("payment_id");
 
-    // Update payment status if coming from MercadoPago
-    if (paymentId) {
-      fetch(`/api/consultations/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentStatus: "approved", paymentId, status: "paid" }),
-      });
-    }
+    const init = async () => {
+      setFetchLoading(true);
+      try {
+        // FIX: await PATCH before GET so the consultation is up-to-date
+        if (paymentId) {
+          await fetch(`/api/consultations/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentStatus: "approved", paymentId, status: "paid" }),
+          });
+        }
+        const res = await fetch(`/api/consultations/${id}`);
+        const data: Consultation = await res.json();
+        setConsultation(data);
+      } catch (err) {
+        console.error("Error loading consultation:", err);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
 
-    fetch(`/api/consultations/${id}`)
-      .then((r) => r.json())
-      .then(setConsultation);
+    init();
   }, [id, searchParams]);
 
   const joinCall = async () => {
@@ -51,6 +61,14 @@ function SuccessContent({ id }: { id: string }) {
       setLoading(false);
     }
   };
+
+  if (fetchLoading) {
+    return (
+      <div className="flex justify-center py-24">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto px-4 sm:px-6 py-16 text-center">

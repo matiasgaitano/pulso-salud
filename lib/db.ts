@@ -11,9 +11,9 @@ const globalForDb = globalThis as unknown as {
 const consultations: Map<string, Consultation> =
   globalForDb.consultations ?? new Map();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.consultations = consultations;
-}
+// Always assign to global so the singleton survives hot-reload in dev
+// AND is shared across module re-evaluations in production edge/serverless.
+globalForDb.consultations = consultations;
 
 export const db = {
   consultations: {

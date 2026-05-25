@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(consultation, { status: 201 });
 }
 
+// GET is intentionally disabled — listing all patient records without auth is a privacy risk.
+// Re-enable with proper role-based auth when building the admin panel.
 export async function GET() {
-  const all = db.consultations.findAll();
-  return NextResponse.json(all);
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
