@@ -6,7 +6,7 @@ import { getSpecialistById } from "@/lib/specialists";
 export async function POST(req: NextRequest) {
   const { consultationId, specialistId } = await req.json();
 
-  const consultation = db.consultations.findById(consultationId);
+  const consultation = await db.consultations.findById(consultationId);
   if (!consultation) {
     return NextResponse.json({ error: "Consulta no encontrada" }, { status: 404 });
   }
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Persist selected specialist
-  db.consultations.update(consultationId, {
+  await db.consultations.update(consultationId, {
     assignedSpecialist: specialist,
     status: "pending_payment",
   });

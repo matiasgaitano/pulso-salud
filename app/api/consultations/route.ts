@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     updatedAt: new Date(),
   };
 
-  db.consultations.create(consultation);
+  await db.consultations.create(consultation);
 
   return NextResponse.json(consultation, { status: 201 });
 }

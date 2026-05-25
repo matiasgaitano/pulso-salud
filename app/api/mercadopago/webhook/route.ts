@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const paymentStatus = statusMap[payment.status ?? ""] ?? "pending";
 
-    db.consultations.update(consultationId, {
+    await db.consultations.update(consultationId, {
       paymentStatus,
       paymentId: String(payment.id),
       ...(paymentStatus === "approved" ? { status: "paid" } : {}),

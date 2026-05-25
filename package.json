@@ -12,8 +12,12 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.36.3",
     "@daily-co/daily-js": "^0.70.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "mercadopago": "^2.0.15",
     "next": "15.5.18",
+    "next-auth": "^4.24.14",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.1.0"

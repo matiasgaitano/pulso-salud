@@ -29,7 +29,7 @@ const ALLOWED_PATCH_KEYS: (keyof AllowedPatch)[] = [
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id } = await params;
-  const consultation = db.consultations.findById(id);
+  const consultation = await db.consultations.findById(id);
 
   if (!consultation) {
     return NextResponse.json({ error: "Consulta no encontrada" }, { status: 404 });
@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
   }
 
-  const updated = db.consultations.update(id, patch);
+  const updated = await db.consultations.update(id, patch);
 
   if (!updated) {
     return NextResponse.json({ error: "Consulta no encontrada" }, { status: 404 });

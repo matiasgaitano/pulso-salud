@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "consultationId requerido" }, { status: 400 });
   }
 
-  const consultation = db.consultations.findById(consultationId);
+  const consultation = await db.consultations.findById(consultationId);
   if (!consultation) {
     return NextResponse.json({ error: "Consulta no encontrada" }, { status: 404 });
   }
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const room = await createRoom(consultationId);
     roomUrl = room.url;
     roomName = room.name;
-    db.consultations.update(consultationId, {
+    await db.consultations.update(consultationId, {
       dailyRoomUrl: roomUrl,
       dailyRoomName: roomName,
       status: "scheduled",
