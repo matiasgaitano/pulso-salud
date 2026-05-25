@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if triage is complete
-        const clinicalRecord = parseClinicalRecord(fullText);
+        const conversationText = [...history.map((h) => h.content), message, fullText].join(" ");
+        const clinicalRecord = parseClinicalRecord(fullText, conversationText);
         if (clinicalRecord) {
           // Strip the XML block from the last text sent
           const cleanText = stripFichaBlock(fullText);

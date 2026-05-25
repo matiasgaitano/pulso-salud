@@ -83,13 +83,126 @@ function normalizeSpecialty(raw: string): Specialty {
   return SPECIALTY_ALIASES[normalized] ?? "medicina_general";
 }
 
-export function parseClinicalRecord(text: string): ClinicalRecord | null {
+// Keyword-based safety net: overrides the model's specialty choice when it's clearly wrong.
+// Haiku sometimes ignores prompt instructions — this catches obvious mismatches.
+const SPECIALTY_KEYWORDS: { specialty: Specialty; keywords: string[] }[] = [
+  {
+    specialty: "traumatologia",
+    keywords: [
+      "rodilla", "menisco", "ligamento", "columna", "lumbar", "cervical",
+      "fractura", "esguince", "tendinitis", "articulación", "cadera",
+      "tobillo", "hombro", "codo", "muñeca", "operacion hueso", "cirugía ortopédica",
+      "dolor muscular", "lesión deportiva", "hernia de disco", "escoliosis",
+    ],
+  },
+  {
+    specialty: "cardiologia",
+    keywords: [
+      "dolor de pecho", "presión alta", "hipertensión", "palpitaciones",
+      "arritmia", "infarto", "angina", "colesterol", "insuficiencia cardíaca",
+      "corazón", "taquicardia", "bradicardia",
+    ],
+  },
+  {
+    specialty: "neurologia",
+    keywords: [
+      "dolor de cabeza", "migraña", "jaqueca", "mareos", "vértigo",
+      "convulsión", "epilepsia", "hormigueo", "entumecimiento", "temblor",
+      "pérdida de memoria", "esclerosis", "parkinson", "neuropatía",
+    ],
+  },
+  {
+    specialty: "dermatologia",
+    keywords: [
+      "mancha en la piel", "lunar", "erupción", "picazón", "sarpullido",
+      "acné", "psoriasis", "eczema", "dermatitis", "hongo en la piel",
+      "caída de cabello", "alopecia", "urticaria",
+    ],
+  },
+  {
+    specialty: "gastroenterologia",
+    keywords: [
+      "dolor de estómago", "dolor abdominal", "diarrea", "constipación",
+      "estreñimiento", "reflujo", "acidez", "colon", "intestino",
+      "náuseas", "vómitos crónicos", "sangre en heces", "colitis",
+      "celíaca", "crohn", "hígado", "vesícula",
+    ],
+  },
+  {
+    specialty: "ginecologia",
+    keywords: [
+      "menstruación", "regla", "período", "embarazo", "menopausia",
+      "ovario", "útero", "vagina", "flujo", "dolor pélvico",
+      "endometriosis", "quiste ovárico", "anticonceptivos",
+    ],
+  },
+  {
+    specialty: "endocrinologia",
+    keywords: [
+      "diabetes", "glucosa", "azúcar en sangre", "tiroides", "hipotiroidismo",
+      "hipertiroidismo", "obesidad", "sobrepeso", "hormona", "insulina",
+      "cansancio crónico", "fatiga crónica", "metabolismo",
+    ],
+  },
+  {
+    specialty: "psiquiatria",
+    keywords: [
+      "ansiedad", "depresión", "pánico", "ataque de pánico", "insomnio",
+      "tristeza", "angustia", "fobia", "trastorno", "adicción",
+      "no puedo dormir", "pensamientos negativos", "ganas de llorar",
+    ],
+  },
+  {
+    specialty: "pediatria",
+    keywords: [
+      "niño", "niña", "bebé", "hijo", "hija", "menor de edad",
+      "tiene 1 año", "tiene 2 años", "tiene 3 años", "tiene 4 años",
+      "tiene 5 años", "tiene 6 años", "tiene 7 años", "tiene 8 años",
+      "tiene 9 años", "tiene 10 años", "tiene 11 años", "tiene 12 años",
+      "tiene 13 años", "tiene 14 años", "tiene 15 años", "tiene 16 años",
+      "mi hijo", "mi hija", "el nene", "la nena",
+    ],
+  },
+  {
+    specialty: "neurologia",
+    keywords: ["dolor de cabeza fuerte", "cefalea"],
+  },
+];
+
+function overrideSpecialtyByKeywords(
+  record: ClinicalRecord,
+  conversationText: string
+): Specialty {
+  const text = [
+    record.chiefComplaint,
+    ...record.symptoms,
+    record.triageSummary,
+    conversationText,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  // Score each specialty by how many keywords appear in the text
+  const scores: Partial<Record<Specialty, number>> = {};
+  for (const { specialty, keywords } of SPECIALTY_KEYWORDS) {
+    const matches = keywords.filter((kw) => text.includes(kw.toLowerCase())).length;
+    if (matches > 0) scores[specialty] = (scores[specialty] ?? 0) + matches;
+  }
+
+  if (Object.keys(scores).length === 0) return record.recommendedSpecialty;
+
+  // Return specialty with highest keyword score
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best[0] as Specialty;
+}
+
+export function parseClinicalRecord(text: string, conversationText = ""): ClinicalRecord | null {
   const match = text.match(/<FICHA_CLINICA>([\s\S]*?)<\/FICHA_CLINICA>/);
   if (!match) return null;
 
   try {
     const raw = JSON.parse(match[1].trim());
-    return {
+    const base: ClinicalRecord = {
       chiefComplaint: raw.chiefComplaint ?? "",
       symptoms: Array.isArray(raw.symptoms) ? raw.symptoms : [],
       duration: raw.duration ?? "",
@@ -100,6 +213,10 @@ export function parseClinicalRecord(text: string): ClinicalRecord | null {
       recommendedSpecialty: normalizeSpecialty(raw.recommendedSpecialty ?? ""),
       triageSummary: raw.triageSummary ?? "",
       generatedAt: new Date(),
+    };
+    return {
+      ...base,
+      recommendedSpecialty: overrideSpecialtyByKeywords(base, conversationText),
     };
   } catch {
     return null;
