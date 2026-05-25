@@ -30,13 +30,20 @@ export default function SpecialistPage({ params }: Props) {
 
       setConsultation(c);
 
-      // Filter by recommended specialty, fallback to all
-      const matching = c.clinicalRecord
-        ? all.filter(
-            (s) => s.specialty === c.clinicalRecord!.recommendedSpecialty
-          )
-        : all;
-      setSpecialists(matching.length > 0 ? matching : all.slice(0, 3));
+      if (c.clinicalRecord) {
+        const recommended = c.clinicalRecord.recommendedSpecialty;
+        const primary = all.filter((s) => s.specialty === recommended);
+        // Always show at least 3 options — pad with medicina_general if needed
+        const fallback = all.filter(
+          (s) => s.specialty === "medicina_general" && !primary.includes(s)
+        );
+        const result = primary.length >= 2
+          ? primary
+          : [...primary, ...fallback].slice(0, 3);
+        setSpecialists(result);
+      } else {
+        setSpecialists(all.slice(0, 3));
+      }
       setIsLoading(false);
     };
     load();
@@ -76,9 +83,16 @@ export default function SpecialistPage({ params }: Props) {
       <h1 className="text-2xl font-bold text-slate-900 mb-1">
         Especialistas recomendados
       </h1>
-      <p className="text-slate-500 text-sm mb-8">
-        Basado en tu triage, estos son los especialistas más adecuados para tu caso.
-      </p>
+      <div className="flex items-center gap-2 mb-8">
+        <p className="text-slate-500 text-sm">
+          Basado en tu triage, el sistema recomendó:
+        </p>
+        {consultation?.clinicalRecord && (
+          <span className="bg-pulso-100 text-pulso-700 text-xs font-semibold px-3 py-1 rounded-full capitalize">
+            {consultation.clinicalRecord.recommendedSpecialty.replace("_", " ")}
+          </span>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Specialist list */}
