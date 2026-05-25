@@ -262,6 +262,61 @@ function overrideSpecialtyByKeywords(
   return best[0] as Specialty;
 }
 
+const CLASSIFICATION_SYSTEM_PROMPT = `Sos un clasificador médico de Pulso Salud. Tu ÚNICA tarea es elegir la especialidad correcta para un caso clínico.
+
+Respondé con UNA SOLA PALABRA de esta lista exacta (sin tildes, sin explicación, sin puntuación extra):
+cardiologia | neurologia | dermatologia | traumatologia | ginecologia | pediatria | gastroenterologia | endocrinologia | psiquiatria | medicina_general
+
+GUÍA DE CLASIFICACIÓN:
+- traumatologia: cualquier problema de huesos, articulaciones, músculos, tendones, ligamentos. Rodilla, cadera, columna, hombro, fractura, esguince, menisco, hernia de disco, artrosis.
+- cardiologia: corazón, presión arterial, palpitaciones, arritmias, colesterol.
+- neurologia: cerebro y sistema nervioso. Migraña, mareos, convulsiones, hormigueos, pérdida de fuerza.
+- dermatologia: piel, pelo, uñas. Manchas, acné, psoriasis, hongos dérmicos, eczema, dermatitis de contacto, urticaria crónica.
+- ginecologia: problemas reproductivos femeninos. Menstruación, embarazo, ovarios, útero, menopausia.
+- pediatria: cualquier paciente menor de 18 años.
+- gastroenterologia: estómago, intestino, colon, hígado, digestión.
+- endocrinologia: diabetes, tiroides, hormonas, metabolismo, obesidad metabólica.
+- psiquiatria: salud mental. Ansiedad, depresión, pánico, insomnio crónico, adicciones.
+- medicina_general: todo lo que no encaje arriba, incluyendo:
+  * urología (fimosis, próstata, infecciones urinarias, riñón)
+  * oftalmología (ojos, visión)
+  * otorrinolaringología (oído, nariz, garganta)
+  * alergología general (alergia alimentaria, rinitis alérgica, asma alérgica)
+  * inmunología
+  * infectología
+  * cualquier síntoma inespecífico sin sistema claro afectado
+
+Si tenés dudas entre dos especialidades, elegí la más específica. Si el caso no encaja claramente en ninguna especialidad disponible, elegí medicina_general.`;
+
+export async function classifySpecialty(
+  record: ClinicalRecord,
+  conversationText: string
+): Promise<Specialty> {
+  try {
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 10,
+      system: CLASSIFICATION_SYSTEM_PROMPT,
+      messages: [
+        {
+          role: "user",
+          content: `Motivo de consulta: ${record.chiefComplaint}
+Síntomas: ${record.symptoms.join(", ")}
+Resumen clínico: ${record.triageSummary}
+Conversación: ${conversationText.slice(0, 600)}`,
+        },
+      ],
+    });
+    const raw =
+      response.content[0].type === "text"
+        ? response.content[0].text.trim().toLowerCase()
+        : "";
+    return normalizeSpecialty(raw);
+  } catch {
+    return record.recommendedSpecialty;
+  }
+}
+
 export function parseClinicalRecord(text: string, conversationText = ""): ClinicalRecord | null {
   const match = text.match(/<FICHA_CLINICA>([\s\S]*?)<\/FICHA_CLINICA>/);
   if (!match) return null;

@@ -3,6 +3,7 @@ import {
   anthropic,
   TRIAGE_SYSTEM_PROMPT,
   parseClinicalRecord,
+  classifySpecialty,
   stripFichaBlock,
 } from "@/lib/anthropic";
 import type { TriageRequest } from "@/types";
@@ -55,11 +56,12 @@ export async function POST(req: NextRequest) {
         const conversationText = [...history.map((h) => h.content), message, fullText].join(" ");
         const clinicalRecord = parseClinicalRecord(fullText, conversationText);
         if (clinicalRecord) {
-          // Strip the XML block from the last text sent
+          // Second-pass: dedicated Sonnet classifier for accurate specialty routing
+          const verifiedSpecialty = await classifySpecialty(clinicalRecord, conversationText);
+          const finalRecord = { ...clinicalRecord, recommendedSpecialty: verifiedSpecialty };
           const cleanText = stripFichaBlock(fullText);
-          // Re-send cleaned text as a replace signal
           send({ type: "replace_text", text: cleanText });
-          send({ type: "clinical_record", data: clinicalRecord });
+          send({ type: "clinical_record", data: finalRecord });
         }
 
         send({ type: "done" });
