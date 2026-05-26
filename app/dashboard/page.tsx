@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getProfileByUserId } from "@/lib/profile";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Consultation } from "@/types";
@@ -26,15 +27,20 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
+  const userId = (session.user as { id: string }).id;
   const email = session.user.email!;
-  const consultations = await db.consultations.findByPatientEmail(email);
+  const [consultations, profile] = await Promise.all([
+    db.consultations.findByPatientEmail(email),
+    getProfileByUserId(userId),
+  ]);
+  const profileComplete = !!(profile?.basicInfo?.age || profile?.activeConditions?.length);
 
   const active = consultations.filter((c) => !["completed", "cancelled"].includes(c.status));
   const past = consultations.filter((c) => ["completed", "cancelled"].includes(c.status));
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             Hola, {session.user.name?.split(" ")[0]}
@@ -48,6 +54,32 @@ export default async function DashboardPage() {
           + Nueva consulta
         </Link>
       </div>
+
+      {/* Nav tabs */}
+      <div className="flex gap-1 mb-6 bg-slate-50 p-1 rounded-xl w-fit">
+        <Link href="/dashboard"
+          className="px-4 py-2 text-sm font-medium rounded-lg bg-white text-slate-900 shadow-sm">
+          Mis consultas
+        </Link>
+        <Link href="/dashboard/salud"
+          className="px-4 py-2 text-sm font-medium rounded-lg text-slate-500 hover:text-slate-700 transition-colors">
+          Mi Salud
+        </Link>
+      </div>
+
+      {/* Onboarding banner */}
+      {!profileComplete && (
+        <div className="bg-pulso-50 border border-pulso-200 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-pulso-800">Completá tu perfil de salud</p>
+            <p className="text-xs text-pulso-700 mt-0.5">Agiliza el triage y activa las recomendaciones preventivas personalizadas</p>
+          </div>
+          <Link href="/onboarding"
+            className="flex-shrink-0 px-4 py-2 bg-pulso-600 text-white text-sm font-medium rounded-xl hover:bg-pulso-700 transition-colors">
+            Completar
+          </Link>
+        </div>
+      )}
 
       {consultations.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-100">
