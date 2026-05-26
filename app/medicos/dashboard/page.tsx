@@ -100,16 +100,14 @@ function PatientCard({ consultation: c }: { consultation: Consultation }) {
           </p>
         </div>
       </div>
-      {c.clinicalRecord && (
-        <div className="mt-3 pt-3 border-t border-slate-50 flex gap-2">
-          <a
-            href={`/consultation/${c.id}/specialist`}
-            className="text-xs text-pulso-600 font-medium hover:underline"
-          >
-            Ver ficha completa
-          </a>
-        </div>
-      )}
+      <div className="mt-3 pt-3 border-t border-slate-50">
+        <a
+          href={`/medicos/paciente/${c.id}`}
+          className="text-xs text-pulso-600 font-medium hover:underline"
+        >
+          Ver ficha completa y panel de salud →
+        </a>
+      </div>
     </div>
   );
 }
